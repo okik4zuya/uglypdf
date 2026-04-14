@@ -7,6 +7,15 @@ set "TARGET=%~1"
 REM Directory where BAT file is located
 set "SCRIPT_DIR=%~dp0"
 
+REM Activate virtual environment
+set "ACTIVATE=%SCRIPT_DIR%venv\Scripts\activate.bat"
+if not exist "%ACTIVATE%" (
+echo ERROR: venv not found. Run setup.bat to create it.
+pause
+exit /b
+)
+call "%ACTIVATE%"
+
 REM Python interpreter inside virtual environment
 set "PYTHON=%SCRIPT_DIR%venv\Scripts\python.exe"
 
