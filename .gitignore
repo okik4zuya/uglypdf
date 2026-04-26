@@ -16,6 +16,7 @@ dist/
 poppler/
 tesseract/
 upx/
+ghostscript/
 
 # Dist staging folder
 dist-pdf2md/
@@ -24,6 +25,7 @@ dist-pdf2md/
 .claude/
 .vscode/
 .idea/
+CLAUDE.md
 
 # OS
 Thumbs.db

@@ -27,18 +27,19 @@ class ConvertTab(tk.Frame):
 
         # File list
         list_frame = tk.Frame(self, bg="#f5f5f5")
-        list_frame.pack(fill="both", expand=True, padx=12, pady=4)
+        list_frame.pack(fill="x", padx=12, pady=4)
         tk.Label(list_frame, text="Files queued:", bg="#f5f5f5",
                  font=("Segoe UI", 9), fg="#333").pack(anchor="w")
 
         inner = tk.Frame(list_frame, bg="#f5f5f5")
-        inner.pack(fill="both", expand=True)
+        inner.pack(fill="x")
         sb = tk.Scrollbar(inner, orient="vertical")
         sb.pack(side="right", fill="y")
-        self.listbox = tk.Listbox(inner, font=("Segoe UI", 9), yscrollcommand=sb.set,
+        self.listbox = tk.Listbox(inner, font=("Segoe UI", 9), height=4,
+                                   yscrollcommand=sb.set,
                                    bg="white", selectbackground="#bbdefb",
                                    relief="solid", bd=1)
-        self.listbox.pack(fill="both", expand=True)
+        self.listbox.pack(fill="x", expand=True)
         sb.config(command=self.listbox.yview)
 
         # Buttons

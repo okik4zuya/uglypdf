@@ -24,28 +24,41 @@ class MergeTab(tk.Frame):
 
         # List + reorder buttons
         list_frame = tk.Frame(self, bg="#f5f5f5")
-        list_frame.pack(fill="both", expand=True, padx=12, pady=(2, 4))
+        list_frame.pack(fill="x", padx=12, pady=(2, 4))
 
         lb_wrap = tk.Frame(list_frame, bg="#f5f5f5")
-        lb_wrap.pack(side="left", fill="both", expand=True)
+        lb_wrap.pack(side="left", fill="x", expand=True)
+
         sb = tk.Scrollbar(lb_wrap, orient="vertical")
         sb.pack(side="right", fill="y")
-        self.listbox = tk.Listbox(lb_wrap, font=("Segoe UI", 9), yscrollcommand=sb.set,
+        self.listbox = tk.Listbox(lb_wrap, font=("Segoe UI", 9), height=4,
+                                   yscrollcommand=sb.set,
                                    bg="white", selectbackground="#bbdefb",
                                    relief="solid", bd=1)
-        self.listbox.pack(fill="both", expand=True)
+        self.listbox.pack(fill="x", expand=True)
         sb.config(command=self.listbox.yview)
 
-        ctrl = tk.Frame(list_frame, bg="#f5f5f5")
-        ctrl.pack(side="left", fill="y", padx=(6, 0))
+        reorder_ctrl = tk.Frame(list_frame, bg="#f5f5f5")
+        reorder_ctrl.pack(side="left", fill="y", padx=(6, 0))
         for text, cmd in [("↑", self._move_up), ("↓", self._move_down)]:
-            tk.Button(ctrl, text=text, command=cmd, width=3,
+            tk.Button(reorder_ctrl, text=text, command=cmd, width=3,
                       relief="flat", bg="#e0e0e0",
                       font=("Segoe UI", 11)).pack(pady=2)
-        tk.Button(ctrl, text="✕", command=self._remove, width=3,
-                  relief="flat", bg="#e0e0e0",
-                  fg="#c62828", font=("Segoe UI", 10)).pack(pady=(6, 0))
+        
+        # --- Action Buttons below list_frame ---
+        action_row = tk.Frame(self, bg="#f5f5f5")
+        action_row.pack(fill="x", padx=12, pady=(0, 8))
 
+        # X (Remove) button
+        tk.Button(action_row, text="Remove Selected", command=self._remove,
+                  relief="flat", bg="#e0e0e0", 
+                  font=("Segoe UI", 9), padx=10).pack(side="left", padx=6)
+
+        # Clear All button
+        tk.Button(action_row, text="Clear All", command=self._clear,
+                  relief="flat", bg="#e0e0e0", font=("Segoe UI", 9)).pack(side="left")
+        
+        
         # Output options
         opt = tk.LabelFrame(self, text=" Output ", bg="#f5f5f5",
                              font=("Segoe UI", 9), fg="#555")
@@ -74,8 +87,6 @@ class MergeTab(tk.Frame):
         # Buttons
         btn_row = tk.Frame(self, bg="#f5f5f5")
         btn_row.pack(fill="x", padx=12, pady=4)
-        tk.Button(btn_row, text="Clear All", command=self._clear,
-                  relief="flat", bg="#e0e0e0", padx=8, pady=3).pack(side="left")
         self.btn = tk.Button(btn_row, text="Merge PDFs", command=self._start,
                               relief="flat", bg="#1565c0", fg="white",
                               font=("Segoe UI", 9, "bold"), padx=14, pady=3,

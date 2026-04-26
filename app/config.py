@@ -9,6 +9,7 @@ def get_base_dir():
     return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
-BASE_DIR     = get_base_dir()
-POPPLER_PATH = os.path.join(BASE_DIR, "poppler", "Library", "bin")
-TESSERACT_PATH = os.path.join(BASE_DIR, "tesseract", "tesseract.exe")
+BASE_DIR        = get_base_dir()
+POPPLER_PATH    = os.path.join(BASE_DIR, "poppler", "Library", "bin")
+TESSERACT_PATH  = os.path.join(BASE_DIR, "tesseract", "tesseract.exe")
+GHOSTSCRIPT_PATH = os.path.join(BASE_DIR, "ghostscript", "bin", "gswin64c.exe")
