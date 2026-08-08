@@ -81,6 +81,15 @@ jobs:
             -x ghostscript-mac/gs \
             -d ghostscript-mac/libs -p @executable_path/libs/
 
+          # gs has no compiled-in prefix once copied out of Cellar, so it
+          # can't find its init/font/ICC files on its own — stage them
+          # alongside the binary and point GS_LIB at them at runtime
+          # (see app/tab_compress.py).
+          gs_share_dir="$(brew --prefix ghostscript)/share/ghostscript"
+          gs_version="$(ls "$gs_share_dir")"
+          cp -R "$gs_share_dir/$gs_version/Resource" ghostscript-mac/Resource
+          cp -R "$gs_share_dir/$gs_version/lib" ghostscript-mac/lib
+
       - name: Generate icon.icns from icon.ico
         run: |
           source venv/bin/activate

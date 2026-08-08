@@ -2,6 +2,7 @@ import io
 import os
 import shutil
 import subprocess
+import sys
 import threading
 import tkinter as tk
 from tkinter import filedialog
@@ -398,6 +399,19 @@ class CompressTab(tk.Frame):
             if gs:
                 self.after(0, lambda: self.log.write("  Using GhostScript…", "info"))
                 gs_setting = _GS_SETTINGS.get(opts.get("preset", "medium"), "/ebook")
+
+                env = os.environ.copy()
+                if sys.platform == "darwin":
+                    # Bundled macOS gs binary has no compiled-in prefix, so it
+                    # can't find its own init/font files unless GS_LIB points
+                    # at the Resource/lib dirs staged alongside it in CI.
+                    gs_dir = os.path.dirname(gs)
+                    resource_dir = os.path.join(gs_dir, "Resource")
+                    lib_dir = os.path.join(gs_dir, "lib")
+                    gs_lib_dirs = [d for d in (resource_dir, lib_dir) if os.path.isdir(d)]
+                    if gs_lib_dirs:
+                        env["GS_LIB"] = os.pathsep.join(gs_lib_dirs)
+
                 subprocess.run(
                     [
                         gs,
@@ -409,7 +423,10 @@ class CompressTab(tk.Frame):
                         path,
                     ],
                     check=True,
-                    creationflags=0x08000000,  # CREATE_NO_WINDOW on Windows
+                    env=env,
+                    # CREATE_NO_WINDOW is Windows-only; subprocess raises
+                    # ValueError if creationflags is nonzero on POSIX.
+                    creationflags=0x08000000 if sys.platform == "win32" else 0,
                 )
             else:
                 self.after(0, lambda: self.log.write(
