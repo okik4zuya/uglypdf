@@ -3,6 +3,8 @@
 ; Requires dist\UglyPDF\ to already exist (run build.bat first).
 
 !include "MUI2.nsh"
+!include "nsDialogs.nsh"
+!include "FileFunc.nsh"
 
 ; ---------------------------------------------------------------------------
 ; Constants — bump APP_VERSION alongside app/tab_about.py::VERSION
@@ -64,8 +66,6 @@ Function DesktopShortcutPageLeave
     ${NSD_GetState} $DesktopCheckbox $CreateDesktopShortcut
 FunctionEnd
 
-!include "nsDialogs.nsh"
-
 ; ---------------------------------------------------------------------------
 ; Install
 ; ---------------------------------------------------------------------------
@@ -100,8 +100,6 @@ Section "Install" SEC01
 
     WriteUninstaller "$INSTDIR\Uninstall.exe"
 SectionEnd
-
-!include "FileFunc.nsh"
 
 ; ---------------------------------------------------------------------------
 ; Uninstall
