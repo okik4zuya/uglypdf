@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - "v*"
+  workflow_dispatch: {}
 
 jobs:
   windows-build:
@@ -52,6 +53,49 @@ jobs:
           source venv/bin/activate
           pip install -r requirements.txt
 
+      - name: Fetch and stage macOS binaries (poppler, tesseract, ghostscript)
+        run: |
+          brew install poppler tesseract ghostscript dylibbundler
+
+          mkdir -p poppler-mac tesseract-mac/tessdata ghostscript-mac
+
+          # Stage the binaries, then use dylibbundler to copy every dylib
+          # each one depends on alongside it and rewrite its load paths to
+          # @executable_path/libs — makes the folder relocatable so it
+          # keeps working on a Mac that doesn't have Homebrew installed.
+          cp "$(brew --prefix poppler)/bin/pdftoppm" poppler-mac/
+          cp "$(brew --prefix poppler)/bin/pdftocairo" poppler-mac/
+          dylibbundler -od -b \
+            -x poppler-mac/pdftoppm \
+            -x poppler-mac/pdftocairo \
+            -d poppler-mac/libs -p @executable_path/libs/
+
+          cp "$(brew --prefix tesseract)/bin/tesseract" tesseract-mac/
+          cp "$(brew --prefix tesseract)/share/tessdata/eng.traineddata" tesseract-mac/tessdata/
+          dylibbundler -od -b \
+            -x tesseract-mac/tesseract \
+            -d tesseract-mac/libs -p @executable_path/libs/
+
+          cp "$(brew --prefix ghostscript)/bin/gs" ghostscript-mac/
+          dylibbundler -od -b \
+            -x ghostscript-mac/gs \
+            -d ghostscript-mac/libs -p @executable_path/libs/
+
+      - name: Generate icon.icns from icon.ico
+        run: |
+          source venv/bin/activate
+          python - <<'PY'
+          import os
+          from PIL import Image
+
+          img = Image.open("icon.ico").convert("RGBA")
+          os.makedirs("icon.iconset", exist_ok=True)
+          for size in (16, 32, 64, 128, 256, 512):
+              img.resize((size, size), Image.LANCZOS).save(f"icon.iconset/icon_{size}x{size}.png")
+              img.resize((size * 2, size * 2), Image.LANCZOS).save(f"icon.iconset/icon_{size}x{size}@2x.png")
+          PY
+          iconutil -c icns icon.iconset -o icon.icns
+
       - name: Build app bundle
         run: |
           source venv/bin/activate
@@ -81,6 +125,7 @@ jobs:
 
   release:
     needs: [windows-build, macos-build]
+    if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4

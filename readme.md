@@ -68,19 +68,15 @@ pdf2md-cli/
 ├── poppler/               # Poppler binaries, Windows (bundled)
 ├── tesseract/             # Tesseract OCR, Windows (bundled)
 ├── ghostscript/           # Ghostscript, Windows (bundled)
-├── poppler-mac/           # Poppler binaries, macOS (bundled, not yet in repo)
-├── tesseract-mac/         # Tesseract OCR, macOS (bundled, not yet in repo)
-├── ghostscript-mac/       # Ghostscript, macOS (bundled, not yet in repo)
 ├── assets/
 │   └── mascot.svg         # landing page mascot
 │
 ├── .github/workflows/
-│   └── release.yml        # CI: builds Windows installer + macOS dmg on version tags
+│   └── release.yml        # CI: fetches macOS binaries, builds Windows installer + macOS dmg
 │
 ├── pdf2md_gui.py          # entry point
 ├── pdf2md.py              # CLI version (legacy)
-├── icon.ico               # app icon (Windows)
-├── icon.icns              # app icon (macOS, not yet in repo)
+├── icon.ico               # app icon (Windows; icon.icns for macOS is generated in CI)
 ├── index.html             # landing page
 │
 ├── build.bat              # build standalone exe
@@ -146,18 +142,11 @@ tesseract/tessdata/eng.traineddata
 ghostscript/bin/gswin64c.exe
 ```
 
-#### macOS binaries (for building/running on macOS)
+#### macOS binaries
 
-These aren't produced on Windows and must be sourced separately (e.g. via `brew install` + copying the resulting binaries/dylibs out of the Homebrew cellar, or downloading prebuilt bottles):
+Not needed on this machine — the `macos-build` job in `.github/workflows/release.yml` fetches Poppler, Tesseract and Ghostscript via Homebrew on the runner, uses `dylibbundler` to make them relocatable, and generates `icon.icns` from `icon.ico` with Pillow, all before invoking PyInstaller. Nothing mac-specific needs to be committed to the repo.
 
-```text
-poppler-mac/            ← pdftoppm, pdftocairo + dylibs (from a poppler Homebrew bottle)
-tesseract-mac/tesseract
-tesseract-mac/tessdata/eng.traineddata
-ghostscript-mac/gs
-```
-
-Also add `icon.icns` (converted from `icon.ico`) at the repo root for the macOS `.app` bundle icon.
+If you're setting up a native dev environment on an actual Mac instead, install the same three formulae locally (`brew install poppler tesseract ghostscript`) — running from source, `pdf2image`/`pytesseract` will pick them up off `PATH`.
 
 ### 5. Run from source
 
@@ -192,7 +181,7 @@ Runs `build.bat` first, then compiles `installer.nsi` into `dist/UglyPDFSetup-<v
 
 ## macOS Build
 
-No PyInstaller cross-compilation — macOS builds run on the `macos-latest` GitHub Actions runner defined in `.github/workflows/release.yml`, triggered by pushing a `v*` tag. It produces both the Windows installer and the macOS `.dmg` and attaches them to a GitHub Release. Requires the macOS binaries and `icon.icns` described above to be committed first.
+No PyInstaller cross-compilation — macOS builds run on the `macos-latest` GitHub Actions runner defined in `.github/workflows/release.yml`, triggered by pushing a `v*` tag (or manually via **Actions → Release → Run workflow**). The job installs Poppler/Tesseract/Ghostscript with Homebrew, bundles their dylibs with `dylibbundler`, generates `icon.icns`, then builds and packages the `.dmg` — nothing needs to be pre-committed. On a tag push it also builds the Windows installer and attaches both to a GitHub Release.
 
 ---
 
