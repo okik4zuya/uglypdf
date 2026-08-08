@@ -3,7 +3,7 @@ from tkinter import font as tkfont
 import webbrowser
 
 APP_NAME    = "Ugly PDF"
-VERSION     = "1.0.0"
+VERSION     = "1.0.2"
 GITHUB_URL  = "https://github.com/okik4zuya/uglypdf"   # replace with real URL
 
 
@@ -34,7 +34,7 @@ class AboutTab(tk.Frame):
         # Features
         features = [
             ("PDF → Markdown", "Extract text from PDFs. Auto OCR for scanned files."),
-            ("Compress",        "Reduce PDF file size by stripping metadata and re-compressing streams."),
+            ("Compress",        "Reduce PDF file size up to 80%."),
             ("Merge",           "Combine multiple PDFs into one. Reorder before merging."),
             ("Split",           "Split by every page or custom ranges like 1–3, 5, 7–9."),
             ("Page Editor",     "Reorder, rotate and delete pages. Mix pages from multiple PDFs."),
@@ -55,7 +55,7 @@ class AboutTab(tk.Frame):
         tk.Frame(wrap, height=1, bg="#e5e5e5", width=340).pack(fill="x", pady=(20, 16))
 
         # Built with
-        tk.Label(wrap, text="Built with  Python · tkinter · pypdf · pdfminer · Tesseract OCR",
+        tk.Label(wrap, text="Built with  Python · tkinter · pypdf · pdfminer · Tesseract OCR . Ghostscript",
                  bg="#ffffff", font=("Segoe UI", 8), fg="#aaa").pack(anchor="w")
 
         # GitHub link

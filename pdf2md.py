@@ -13,10 +13,15 @@ def get_base_dir():
     return os.path.dirname(os.path.abspath(__file__))
 
 
+IS_MAC = sys.platform == "darwin"
 BASE_DIR = get_base_dir()
 
-POPPLER_PATH = os.path.join(BASE_DIR, "poppler", "Library", "bin")
-TESSERACT_PATH = os.path.join(BASE_DIR, "tesseract", "tesseract.exe")
+if IS_MAC:
+    POPPLER_PATH = os.path.join(BASE_DIR, "poppler-mac")
+    TESSERACT_PATH = os.path.join(BASE_DIR, "tesseract-mac", "tesseract")
+else:
+    POPPLER_PATH = os.path.join(BASE_DIR, "poppler", "Library", "bin")
+    TESSERACT_PATH = os.path.join(BASE_DIR, "tesseract", "tesseract.exe")
 
 if os.path.exists(TESSERACT_PATH):
     pytesseract.pytesseract.tesseract_cmd = TESSERACT_PATH

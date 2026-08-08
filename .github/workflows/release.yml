@@ -1,0 +1,95 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  windows-build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m venv venv
+          venv\Scripts\pip install -r requirements.txt
+
+      - name: Build exe
+        run: build.bat
+
+      - name: Install NSIS
+        run: choco install nsis -y
+
+      - name: Build installer
+        run: |
+          & "$env:ProgramFiles(x86)\NSIS\makensis.exe" installer.nsi
+        shell: pwsh
+
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-installer
+          path: dist/UglyPDFSetup-*.exe
+
+  macos-build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          pip install -r requirements.txt
+
+      - name: Build app bundle
+        run: |
+          source venv/bin/activate
+          pyinstaller --onedir --windowed --name UglyPDF \
+            --icon icon.icns \
+            --add-data "poppler-mac:poppler-mac" \
+            --add-data "tesseract-mac:tesseract-mac" \
+            --add-data "ghostscript-mac:ghostscript-mac" \
+            --add-data "app:app" \
+            pdf2md_gui.py
+
+      - name: Package .dmg
+        run: |
+          mkdir -p dist/dmg
+          cp -R dist/UglyPDF.app dist/dmg/
+          ln -s /Applications dist/dmg/Applications
+          hdiutil create -volname "UglyPDF" \
+            -srcfolder dist/dmg \
+            -ov -format UDZO \
+            dist/UglyPDF.dmg
+
+      - name: Upload macOS artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-dmg
+          path: dist/UglyPDF.dmg
+
+  release:
+    needs: [windows-build, macos-build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            artifacts/windows-installer/*.exe
+            artifacts/macos-dmg/*.dmg
