@@ -44,8 +44,10 @@ jobs:
           $tessExe = Get-ChildItem stage\tesseract -Recurse -Filter tesseract.exe | Select-Object -First 1
           New-Item -ItemType Directory -Force -Path tesseract\tessdata | Out-Null
           Copy-Item "$($tessExe.Directory.FullName)\*" tesseract\ -Recurse -Exclude "tessdata"
-          $engData = Get-ChildItem stage\tesseract -Recurse -Filter eng.traineddata | Select-Object -First 1
-          Copy-Item $engData.FullName tesseract\tessdata\
+          # The installer doesn't bundle language data — it fetches it over the
+          # network during interactive setup. Pull the fast (small) English
+          # model directly from its own GitHub repo instead.
+          Invoke-WebRequest "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/main/eng.traineddata" -OutFile tesseract\tessdata\eng.traineddata
 
           # --- Ghostscript (NSIS installer, versioned via GitHub API) ---
           $gsRelease = Invoke-RestMethod "https://api.github.com/repos/ArtifexSoftware/ghostpdl-downloads/releases/latest"
