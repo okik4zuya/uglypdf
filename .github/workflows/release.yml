@@ -29,7 +29,7 @@ jobs:
 
       - name: Build installer
         run: |
-          & "$env:ProgramFiles(x86)\NSIS\makensis.exe" installer.nsi
+          & "${env:ProgramFiles(x86)}\NSIS\makensis.exe" installer.nsi
         shell: pwsh
 
       - name: Upload Windows artifact
