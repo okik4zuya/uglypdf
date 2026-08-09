@@ -101,9 +101,21 @@ jobs:
           # alongside the binary and point GS_LIB at them at runtime
           # (see app/tab_compress.py).
           gs_share_dir="$(brew --prefix ghostscript)/share/ghostscript"
-          gs_version="$(ls "$gs_share_dir")"
-          cp -R "$gs_share_dir/$gs_version/Resource" ghostscript-mac/Resource
-          cp -R "$gs_share_dir/$gs_version/lib" ghostscript-mac/lib
+          echo "Ghostscript share dir contents:"
+          ls -la "$gs_share_dir"
+          gs_version="$(find "$gs_share_dir" -mindepth 1 -maxdepth 1 -type d -exec basename {} \; | sort -V | tail -n1)"
+          echo "Using ghostscript version dir: $gs_version"
+          gs_version_dir="$gs_share_dir/$gs_version"
+          if [ -d "$gs_version_dir/Resource" ]; then
+            cp -R "$gs_version_dir/Resource" ghostscript-mac/Resource
+          else
+            echo "::warning::No Resource dir at $gs_version_dir/Resource — skipping (app falls back gracefully)"
+          fi
+          if [ -d "$gs_version_dir/lib" ]; then
+            cp -R "$gs_version_dir/lib" ghostscript-mac/lib
+          else
+            echo "::warning::No lib dir at $gs_version_dir/lib — skipping (app falls back gracefully)"
+          fi
 
       - name: Generate icon.icns from icon.ico
         run: |
