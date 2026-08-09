@@ -36,6 +36,11 @@ REM UglyPDF.spec — e.g. hiddenimports for xhtml2pdf/reportlab — persist
 REM across builds instead of being regenerated and overwritten.
 pyinstaller UglyPDF.spec -y ^
     %UPX_ARGS%
+if errorlevel 1 (
+    echo.
+    echo PyInstaller failed. Aborting.
+    exit /b 1
+)
 
 echo.
 if exist "%SCRIPT_DIR%dist\UglyPDF\UglyPDF.exe" (
@@ -46,6 +51,7 @@ if exist "%SCRIPT_DIR%dist\UglyPDF\UglyPDF.exe" (
     echo No Python installation required.
 ) else (
     echo Build may have failed. Check output above.
+    exit /b 1
 )
 echo.
-pause
+if not defined CI pause

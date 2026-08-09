@@ -21,6 +21,58 @@ jobs:
           python -m venv venv
           venv\Scripts\pip install -r requirements.txt
 
+      - name: Fetch and stage Windows binaries (poppler, tesseract, ghostscript, upx)
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          New-Item -ItemType Directory -Force -Path stage | Out-Null
+
+          # --- Poppler (zip, versioned via GitHub API) ---
+          $popplerRelease = Invoke-RestMethod "https://api.github.com/repos/oschwartz10612/poppler-windows/releases/latest"
+          $popplerAsset = $popplerRelease.assets | Where-Object { $_.name -like "*.zip" } | Select-Object -First 1
+          Invoke-WebRequest $popplerAsset.browser_download_url -OutFile stage\poppler.zip
+          Expand-Archive stage\poppler.zip -DestinationPath stage\poppler -Force
+          $popplerLibBin = Get-ChildItem stage\poppler -Recurse -Directory -Filter bin | Where-Object { $_.Parent.Name -eq "Library" } | Select-Object -First 1
+          New-Item -ItemType Directory -Force -Path poppler\Library | Out-Null
+          Copy-Item $popplerLibBin.FullName poppler\Library\bin -Recurse
+
+          # --- Tesseract (NSIS installer, pinned — UB-Mannheim has no stable "latest" URL) ---
+          $tesseractUrl = "https://digi.bib.uni-mannheim.de/tesseract/tesseract-ocr-w64-setup-5.5.3.20260724.exe"
+          Invoke-WebRequest $tesseractUrl -OutFile stage\tesseract-setup.exe
+          7z x stage\tesseract-setup.exe -ostage\tesseract -y | Out-Null
+          $tessExe = Get-ChildItem stage\tesseract -Recurse -Filter tesseract.exe | Select-Object -First 1
+          New-Item -ItemType Directory -Force -Path tesseract\tessdata | Out-Null
+          Copy-Item "$($tessExe.Directory.FullName)\*" tesseract\ -Recurse -Exclude "tessdata"
+          $engData = Get-ChildItem stage\tesseract -Recurse -Filter eng.traineddata | Select-Object -First 1
+          Copy-Item $engData.FullName tesseract\tessdata\
+
+          # --- Ghostscript (NSIS installer, versioned via GitHub API) ---
+          $gsRelease = Invoke-RestMethod "https://api.github.com/repos/ArtifexSoftware/ghostpdl-downloads/releases/latest"
+          $gsAsset = $gsRelease.assets | Where-Object { $_.name -like "gs*w64.exe" } | Select-Object -First 1
+          Invoke-WebRequest $gsAsset.browser_download_url -OutFile stage\gs-setup.exe
+          7z x stage\gs-setup.exe -ostage\ghostscript -y | Out-Null
+          $gsExe = Get-ChildItem stage\ghostscript -Recurse -Filter gswin64c.exe | Select-Object -First 1
+          $gsRoot = $gsExe.Directory.Parent.FullName
+          New-Item -ItemType Directory -Force -Path ghostscript | Out-Null
+          foreach ($dir in "bin", "lib", "Resource") {
+            if (Test-Path "$gsRoot\$dir") {
+              Copy-Item "$gsRoot\$dir" "ghostscript\$dir" -Recurse
+            } else {
+              Write-Warning "No $dir dir found under $gsRoot — skipping"
+            }
+          }
+
+          # --- UPX (zip, versioned via GitHub API; optional but shrinks output ~40%) ---
+          $upxRelease = Invoke-RestMethod "https://api.github.com/repos/upx/upx/releases/latest"
+          $upxAsset = $upxRelease.assets | Where-Object { $_.name -like "*-win64.zip" } | Select-Object -First 1
+          Invoke-WebRequest $upxAsset.browser_download_url -OutFile stage\upx.zip
+          Expand-Archive stage\upx.zip -DestinationPath stage\upx -Force
+          $upxExe = Get-ChildItem stage\upx -Recurse -Filter upx.exe | Select-Object -First 1
+          New-Item -ItemType Directory -Force -Path upx | Out-Null
+          Copy-Item $upxExe.FullName upx\
+
+          Write-Host "Staged: poppler\Library\bin, tesseract\, ghostscript\, upx\"
+
       - name: Build exe
         run: .\build.bat
 

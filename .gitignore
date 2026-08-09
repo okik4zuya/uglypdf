@@ -11,6 +11,7 @@ __pycache__/
 build/
 dist/
 *.spec
+!UglyPDF.spec
 
 # Bundled binaries (too large for git — add manually)
 poppler/
@@ -31,3 +32,5 @@ CLAUDE.md
 Thumbs.db
 Desktop.ini
 .DS_Store
+
+archive/
