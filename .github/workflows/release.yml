@@ -36,9 +36,10 @@ jobs:
           New-Item -ItemType Directory -Force -Path poppler\Library | Out-Null
           Copy-Item $popplerLibBin.FullName poppler\Library\bin -Recurse
 
-          # --- Tesseract (NSIS installer, pinned — UB-Mannheim has no stable "latest" URL) ---
-          $tesseractUrl = "https://digi.bib.uni-mannheim.de/tesseract/tesseract-ocr-w64-setup-5.5.3.20260724.exe"
-          Invoke-WebRequest $tesseractUrl -OutFile stage\tesseract-setup.exe
+          # --- Tesseract (NSIS installer, versioned via GitHub API) ---
+          $tesseractRelease = Invoke-RestMethod "https://api.github.com/repos/tesseract-ocr/tesseract/releases/latest"
+          $tesseractAsset = $tesseractRelease.assets | Where-Object { $_.name -like "tesseract-ocr-w64-setup-*.exe" } | Select-Object -First 1
+          Invoke-WebRequest $tesseractAsset.browser_download_url -OutFile stage\tesseract-setup.exe
           7z x stage\tesseract-setup.exe -ostage\tesseract -y | Out-Null
           $tessExe = Get-ChildItem stage\tesseract -Recurse -Filter tesseract.exe | Select-Object -First 1
           New-Item -ItemType Directory -Force -Path tesseract\tessdata | Out-Null
