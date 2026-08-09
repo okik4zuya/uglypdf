@@ -63,23 +63,38 @@ jobs:
           # each one depends on alongside it and rewrite its load paths to
           # @executable_path/libs — makes the folder relocatable so it
           # keeps working on a Mac that doesn't have Homebrew installed.
+          # dylibbundler only resolves a dylib via the exact path baked into
+          # the binary's load commands; when that doesn't line up with where
+          # Homebrew actually put it (e.g. a transitive dep pulled from a
+          # different formula's Cellar), it falls back to an interactive
+          # "Please specify the directory" prompt that just hangs CI. Passing
+          # every relevant formula's lib dir via -s gives it somewhere to
+          # search instead of prompting.
+          brew_lib="$(brew --prefix)/lib"
+          poppler_lib="$(brew --prefix poppler)/lib"
+          tesseract_lib="$(brew --prefix tesseract)/lib"
+          ghostscript_lib="$(brew --prefix ghostscript)/lib"
+
           cp "$(brew --prefix poppler)/bin/pdftoppm" poppler-mac/
           cp "$(brew --prefix poppler)/bin/pdftocairo" poppler-mac/
           dylibbundler -od -b \
             -x poppler-mac/pdftoppm \
             -x poppler-mac/pdftocairo \
-            -d poppler-mac/libs -p @executable_path/libs/
+            -d poppler-mac/libs -p @executable_path/libs/ \
+            -s "$poppler_lib" -s "$brew_lib"
 
           cp "$(brew --prefix tesseract)/bin/tesseract" tesseract-mac/
           cp "$(brew --prefix tesseract)/share/tessdata/eng.traineddata" tesseract-mac/tessdata/
           dylibbundler -od -b \
             -x tesseract-mac/tesseract \
-            -d tesseract-mac/libs -p @executable_path/libs/
+            -d tesseract-mac/libs -p @executable_path/libs/ \
+            -s "$tesseract_lib" -s "$brew_lib"
 
           cp "$(brew --prefix ghostscript)/bin/gs" ghostscript-mac/
           dylibbundler -od -b \
             -x ghostscript-mac/gs \
-            -d ghostscript-mac/libs -p @executable_path/libs/
+            -d ghostscript-mac/libs -p @executable_path/libs/ \
+            -s "$ghostscript_lib" -s "$brew_lib"
 
           # gs has no compiled-in prefix once copied out of Cellar, so it
           # can't find its init/font/ICC files on its own — stage them
