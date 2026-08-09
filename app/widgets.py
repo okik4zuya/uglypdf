@@ -1,3 +1,5 @@
+import os
+import subprocess
 import tkinter as tk
 from tkinterdnd2 import DND_FILES
 
@@ -76,11 +78,41 @@ class LogPanel(tk.Frame):
         self._txt.tag_configure("err",  foreground="#e06c75")
         self._txt.tag_configure("info", foreground="#56b6c2")
 
+        self._link_n = 0
+
     def write(self, msg: str, tag: str = ""):
         self._txt.configure(state="normal")
         self._txt.insert("end", msg + "\n", tag)
         self._txt.see("end")
         self._txt.configure(state="disabled")
+
+    def write_link(self, prefix: str, path: str, tag: str = "", text: str = None, suffix: str = ""):
+        """Write a line with a clickable file path that reveals the file in Explorer.
+
+        `text`, if given, is shown instead of the raw `path` as the link label.
+        `suffix` is appended after the link, on the same line, before the newline.
+        """
+        self._link_n += 1
+        link_tag = f"link{self._link_n}"
+
+        self._txt.configure(state="normal")
+        if prefix:
+            self._txt.insert("end", prefix, tag)
+        self._txt.insert("end", text if text is not None else path, ("link", link_tag))
+        if suffix:
+            self._txt.insert("end", suffix, tag)
+        self._txt.insert("end", "\n", tag)
+        self._txt.see("end")
+        self._txt.configure(state="disabled")
+
+        self._txt.tag_configure("link", foreground="#61afef", underline=True)
+        self._txt.tag_bind(link_tag, "<Button-1>", lambda e, p=path: self._reveal(p))
+        self._txt.tag_bind(link_tag, "<Enter>", lambda e: self._txt.configure(cursor="hand2"))
+        self._txt.tag_bind(link_tag, "<Leave>", lambda e: self._txt.configure(cursor=""))
+
+    @staticmethod
+    def _reveal(path: str):
+        subprocess.Popen(f'explorer /select,"{os.path.normpath(path)}"')
 
     def clear(self):
         self._txt.configure(state="normal")

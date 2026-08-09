@@ -462,14 +462,15 @@ class CompressTab(tk.Frame):
 
             if saved > 0:
                 self.after(0, lambda a=after, b=before, p=pct, o=out_path:
-                           self.log.write(
+                           self.log.write_link(
                                f"  ✔ {_human_size(b)} → {_human_size(a)}"
-                               f"  (−{p:.1f}%)  →  {os.path.basename(o)}", "ok"))
+                               f"  (−{p:.1f}%)  →  ",
+                               o, "ok", text=os.path.basename(o)))
             else:
                 self.after(0, lambda o=out_path:
-                           self.log.write(
-                               f"  ✔ Saved (no size reduction)  →  {os.path.basename(o)}",
-                               "ok"))
+                           self.log.write_link(
+                               "  ✔ Saved (no size reduction)  →  ",
+                               o, "ok", text=os.path.basename(o)))
 
         except Exception as e:
             self.after(0, lambda e=e: self.log.write(f"  ✘ Error: {e}", "err"))

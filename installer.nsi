@@ -10,7 +10,7 @@
 ; Constants — bump APP_VERSION alongside app/tab_about.py::VERSION
 ; ---------------------------------------------------------------------------
 !define APP_NAME        "UglyPDF"
-!define APP_VERSION      "1.0.2"
+!define APP_VERSION      "1.0.3"
 !define APP_PUBLISHER    "okik4zuya"
 !define APP_EXE          "UglyPDF.exe"
 !define APP_URL          "https://github.com/okik4zuya/uglypdf"

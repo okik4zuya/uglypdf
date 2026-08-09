@@ -122,7 +122,7 @@ class ConvertTab(tk.Frame):
             with open(output_md, "w", encoding="utf-8") as f:
                 f.write("# Extracted PDF Content\n\n" + text)
 
-            self.after(0, lambda p=output_md: self.log.write(f"  \u2714 Saved: {p}", "ok"))
+            self.after(0, lambda p=output_md: self.log.write_link("  \u2714 Saved: ", p, "ok"))
 
         except Exception as e:
             self.after(0, lambda e=e: self.log.write(f"  \u2718 Error: {e}", "err"))

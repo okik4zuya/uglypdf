@@ -4,4 +4,6 @@ pillow==11.3.0
 pytesseract==0.3.13
 tkinterdnd2==0.4.2
 pypdf==6.10.1
+markdown==3.10.3
+xhtml2pdf==0.2.17
 pyinstaller==6.14.0

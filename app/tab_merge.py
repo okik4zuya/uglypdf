@@ -177,7 +177,7 @@ class MergeTab(tk.Frame):
                     writer.add_page(page)
             with open(output_path, "wb") as f:
                 writer.write(f)
-            self.after(0, lambda: self.log.write(f"\n\u2714 Saved: {output_path}", "ok"))
+            self.after(0, lambda: self.log.write_link("\n\u2714 Saved: ", output_path, "ok"))
         except Exception as e:
             self.after(0, lambda e=e: self.log.write(f"\n\u2718 Error: {e}", "err"))
         finally:

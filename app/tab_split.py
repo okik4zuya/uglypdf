@@ -169,7 +169,7 @@ class SplitTab(tk.Frame):
                 with open(out, "wb") as f:
                     writer.write(f)
                 self.after(0, lambda n=i, t=total, p=out:
-                           self.log.write(f"[{n}/{t}] \u2714 {os.path.basename(p)}", "ok"))
+                           self.log.write_link(f"[{n}/{t}] \u2714 ", p, "ok", text=os.path.basename(p)))
             self.after(0, lambda: self.log.write(f"\nDone. {total} file(s) saved.", "ok"))
         except Exception as e:
             self.after(0, lambda e=e: self.log.write(f"\u2718 Error: {e}", "err"))

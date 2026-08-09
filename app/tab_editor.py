@@ -110,6 +110,7 @@ class PageEditor(tk.Frame):
         btn("↻ Rotate CCW", lambda: self._rotate(-90)).pack(side="left", padx=2)
         sep()
         btn("💾 Save PDF…",  self._save, "#c8e6c9", "#1b5e20").pack(side="left", padx=2)
+        btn("💾 Save Selected…", self._save_selected, "#c8e6c9", "#1b5e20").pack(side="left", padx=2)
 
     # ── geometry helpers ─────────────────────────────────────────────────────
 
@@ -389,14 +390,28 @@ class PageEditor(tk.Frame):
             filetypes=[("PDF files", "*.pdf")],
             title="Save PDF as…")
         if path:
-            threading.Thread(target=self._write_pdf, args=(path,), daemon=True).start()
+            threading.Thread(
+                target=self._write_pdf, args=(path, self.pages), daemon=True).start()
 
-    def _write_pdf(self, output_path: str):
+    def _save_selected(self):
+        if not self._sel:
+            messagebox.showwarning("No selection", "Select pages to save first.")
+            return
+        pages = [self.pages[i] for i in sorted(self._sel)]
+        path = filedialog.asksaveasfilename(
+            defaultextension=".pdf",
+            filetypes=[("PDF files", "*.pdf")],
+            title="Save Selected Pages as…")
+        if path:
+            threading.Thread(
+                target=self._write_pdf, args=(path, pages), daemon=True).start()
+
+    def _write_pdf(self, output_path: str, pages: list[PageItem]):
         try:
             writer = PdfWriter()
             # Cache open readers to avoid re-opening the same file repeatedly
             readers: dict[str, PdfReader] = {}
-            for page in self.pages:
+            for page in pages:
                 if page.pdf_path not in readers:
                     readers[page.pdf_path] = PdfReader(page.pdf_path)
                 pdf_page = readers[page.pdf_path].pages[page.page_index]

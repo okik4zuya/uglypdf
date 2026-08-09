@@ -5,6 +5,7 @@ from tkinter import ttk
 from tkinterdnd2 import TkinterDnD
 
 from .tab_convert  import ConvertTab
+from .tab_md2pdf   import MdToPdfTab
 from .tab_compress import CompressTab
 from .tab_merge    import MergeTab
 from .tab_split    import SplitTab
@@ -48,6 +49,7 @@ class App(TkinterDnD.Tk):
         nb = ttk.Notebook(self)
 
         t_convert  = ConvertTab(nb)
+        t_md2pdf   = MdToPdfTab(nb)
         t_compress = CompressTab(nb)
         t_merge    = MergeTab(nb)
         t_split    = SplitTab(nb)
@@ -55,6 +57,7 @@ class App(TkinterDnD.Tk):
         t_about    = AboutTab(nb)
 
         nb.add(t_convert,  text="  PDF → MD   ")
+        nb.add(t_md2pdf,   text="  MD → PDF   ")
         nb.add(t_compress, text="  Compress   ")
         nb.add(t_merge,    text="  Merge      ")
         nb.add(t_split,    text="  Split      ")
@@ -64,10 +67,11 @@ class App(TkinterDnD.Tk):
         # Map tab index → frame (About has no _add_files, so omit it)
         tabs = {
             0: t_convert,
-            1: t_compress,
-            2: t_merge,
-            3: t_split,
-            4: t_editor,
+            1: t_md2pdf,
+            2: t_compress,
+            3: t_merge,
+            4: t_split,
+            5: t_editor,
         }
 
         # Toolbar (packed first so it sits above the notebook)

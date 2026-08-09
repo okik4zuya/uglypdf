@@ -31,14 +31,11 @@ echo.
 echo Building UglyPDF.exe...
 echo.
 
-pyinstaller --onedir --windowed --name UglyPDF ^
-    --icon icon.ico ^
-    --add-data "poppler;poppler" ^
-    --add-data "tesseract;tesseract" ^
-    --add-data "app;app" ^
-    --add-data "icon.ico;." ^
-    %UPX_ARGS% ^
-    pdf2md_gui.py
+REM Build from the .spec file (not raw CLI flags) so hand-tuned settings in
+REM UglyPDF.spec — e.g. hiddenimports for xhtml2pdf/reportlab — persist
+REM across builds instead of being regenerated and overwritten.
+pyinstaller UglyPDF.spec -y ^
+    %UPX_ARGS%
 
 echo.
 if exist "%SCRIPT_DIR%dist\UglyPDF\UglyPDF.exe" (
