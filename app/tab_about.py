@@ -3,7 +3,7 @@ from tkinter import font as tkfont
 import webbrowser
 
 APP_NAME    = "Ugly PDF"
-VERSION     = "1.0.3"
+VERSION     = "1.0.4"
 GITHUB_URL  = "https://github.com/okik4zuya/uglypdf"   # replace with real URL
 
 
