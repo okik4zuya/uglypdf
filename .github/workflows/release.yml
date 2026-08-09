@@ -22,7 +22,7 @@ jobs:
           venv\Scripts\pip install -r requirements.txt
 
       - name: Build exe
-        run: build.bat
+        run: .\build.bat
 
       - name: Install NSIS
         run: choco install nsis -y
